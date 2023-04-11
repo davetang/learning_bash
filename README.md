@@ -1,3 +1,19 @@
+Table of Contents
+=================
+
+* [Bash](#bash)
+   * [Strict mode](#strict-mode)
+   * [Functions](#functions)
+   * [Variables](#variables)
+      * [Built-in variables](#built-in-variables)
+   * [Regular expressions and globbing](#regular-expressions-and-globbing)
+   * [String manipulation](#string-manipulation)
+   * [Debugging](#debugging)
+   * [Tips](#tips)
+   * [Further reading](#further-reading)
+
+Created by [gh-md-toc](https://github.com/ekalinin/github-markdown-toc)
+
 # Bash
 
 Bash notes.
