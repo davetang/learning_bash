@@ -324,7 +324,7 @@ xtrace` to the script.
 
 ## Tips
 
-* Use `$()` instead of backticks `\`\`` because it is easier to specify and see
+* Use `$()` instead of backticks ```` because it is easier to specify and see
 nested subshells using `$()`.
 * Use `[[]]` (double brackets) over `[]` because it offers syntactical
   improvements and new functionality
