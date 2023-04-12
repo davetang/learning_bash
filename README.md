@@ -2,6 +2,7 @@ Table of Contents
 =================
 
 * [Bash](#bash)
+   * [Data structures](#data-structures)
    * [Strict mode](#strict-mode)
    * [Functions](#functions)
    * [Variables](#variables)
@@ -17,6 +18,132 @@ Created by [gh-md-toc](https://github.com/ekalinin/github-markdown-toc)
 # Bash
 
 Bash notes.
+
+## Data structures
+
+[Bash variables are untyped](https://tldp.org/LDP/abs/html/untyped.html) and
+they are essentially character strings but if a variable contains only digits,
+Bash allows simple arithmetic operations.
+
+```console
+x=1985
+echo $(( x - 1 ))
+# 1984
+
+x=nine
+echo $(( x - 1 ))
+# -1
+
+x=nineteeneightyfour
+echo $(( x - 1 ))
+# -1
+
+xx=$(( x - 1 ))
+echo $(( xx + 1985))
+# 1984
+```
+
+Bash supports indexed arrays and associative arrays (also known as hashes or
+dictionaries). Since Bash variables are untyped, array elements can contain
+characters and numbers.
+
+The easiest way to manually create an indexed array is to use parentheses.
+
+```console
+fruits=( apple banana cherry durian elderberry )
+
+# zero-indexed
+echo ${fruits[0]}
+# apple
+
+# supports negative indexing
+echo ${fruits[-1]}
+# elderberry
+echo ${fruits[-2]}
+# durian
+
+echo ${fruits[@]}
+# apple banana cherry durian elderberry
+```
+
+Associative arrays must be declared before they are created using `declare` and
+`-A`.
+
+```console
+declare -A fruits_hash
+
+fruits_hash=(
+  [a]=apple
+  [b]=banana
+  [c]=cherry
+  [d]=durian
+  [e]=elderberry
+)
+
+# referenced using square brackets not braces
+echo ${fruits_hash[a]}
+# apple
+
+echo ${fruits_hash[c]}
+# cherry
+```
+
+Array length.
+
+```console
+fruits=( apple banana cherry durian elderberry )
+echo ${#fruits[@]}
+# 5
+
+# get all indexes
+echo ${!fruits[@]}
+# 0 1 2 3 4
+```
+
+Loop through the elements or the index (for both indexed and associative
+arrays).
+
+```console
+for i in ${fruits[@]}; do
+  echo ${i}
+done
+# apple
+# banana
+# cherry
+# durian
+# elderberry
+
+for i in ${!fruits[@]}; do
+  echo ${i}
+done
+# 0
+# 1
+# 2
+# 3
+# 4
+
+for i in ${!fruits_hash[@]}; do
+  echo ${i}
+done
+# a
+# b
+# c
+# d
+# e
+```
+
+Use `unset` to delete an element (even if it is in the middle of an array).
+
+```console
+unset fruits[3]
+echo ${fruits[@]}
+# apple banana cherry elderberry
+```
+
+It seems that [2D arrays are
+possible](https://www.baeldung.com/linux/bash-2d-arrays) but if you need a 2D
+array, you should perhaps consider another scripting language (Python, Perl,
+etc.).
 
 ## Strict mode
 
