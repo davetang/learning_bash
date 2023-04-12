@@ -17,7 +17,26 @@ Created by [gh-md-toc](https://github.com/ekalinin/github-markdown-toc)
 
 # Bash
 
-Bash notes.
+A shell is any user interface to the Linux/UNIX operating system; it is
+external to the kernel (like an actual shell, exoskeleton) and translates user
+input into instructions the operating system can interpret.
+
+[Bash](https://en.wikipedia.org/wiki/Bash_(Unix_shell)) is a Unix shell that is
+widely used as the default login shell for many Linux distributions. It was the
+default login shell for macOS, until they switched to zsh, possibly because of
+the [license](https://discussions.apple.com/thread/250722978) attached to Bash.
+I use Bash since it's the default shell for the two Linux distributions I use
+the most (CentOS and Ubuntu).
+
+Bash is an abbreviation for Bourne again shell, a naming pun for Steve Bourne's
+shell and was created for use in the [GNU
+project](https://www.gnu.org/home.en.html). The GNU project was started for the
+purpose of creating a UNIX-compatible operating system and replacing all
+commercial UNIX utilities with freely distributable versions.
+
+There are two ways to use `bash`: as a command line interface and as a
+programming environment. These notes mostly pertain to the use of Bash as a
+programming/scripting language.
 
 ## Data structures
 
