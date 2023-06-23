@@ -9,7 +9,7 @@ usage(){
 >&2 cat << EOF
    Usage
 
-            $ $0 (<infile> | <stdin>)"
+            $ $0 (<infile> | <stdin>)
 
    Examples
 
