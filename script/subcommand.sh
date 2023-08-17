@@ -6,6 +6,7 @@
 set -euo pipefail
 
 program=$(basename $0)
+script_dir=$(dirname $0)
 version=0.1.0
 description="Tools for doing x and y"
 
@@ -19,7 +20,7 @@ Usage:   $0 <command> [options]
 
 Commands:
 
-     foo            performs foo
+     foo            calls argv.sh
      bar            performs bar
      help           display this help message
      version        display version
@@ -28,9 +29,9 @@ EOF
 exit 1
 }
 
-# store subcommand in another script for better organisation
+# call another script
 sub_foo(){
-   >&2 echo foo $@
+   ${script_dir}/argv.sh $@
 }
 
 sub_bar(){
