@@ -1,0 +1,192 @@
+#!/usr/bin/env bash
+#
+# Written by Dave Tang
+# Year 2023
+#
+# Tip 10. Don't distribute bare JAR files
+#
+set -euo pipefail
+
+# 1. Print something if no parameters are supplied
+if [[ $# -eq 0 ]]; then
+   >&2 echo -e "\nPlease use the --help option to get usage information.\n"
+   exit 1
+fi
+
+my_tool=$(basename $0)
+version=0.1.0
+rc=0
+trim=0
+mask='false'
+
+# Tip 7. Don't hard-code any paths
+# Tip 8. Don't pollute the PATH
+source scripts/helper.sh
+
+# Tip 9. Check that your dependencies are installed
+dependencies=( rev tr sed gunzip )
+for d in ${dependencies[@]}; do
+   check_tool ${d}
+done
+
+# Tip 4. Do not use stdout for messages and errors
+usage(){
+>&2 cat << EOF
+
+Usage: ${my_tool} [options] <file.fq>
+
+Synopsis: manipulate reads in a FASTQ file
+
+Options:
+
+--rc reverse complement
+
+--trim nn trim <nn> bases from 3' end first
+
+--mask mask vector sequence
+
+--help display this message
+
+--version display version
+
+EOF
+exit 1
+}
+
+show_ver(){
+   >&2 echo ${my_tool} ${version}
+   exit 0
+}
+
+# Tip 2. Always have a “-h” or “-help” switch
+# Tip 3. Have a “-v” or “-version” switch
+args=$(getopt -a -o rt:m:hv --long rc,trim:,mask:,help,version -- "$@")
+if [[ $? -gt 0 ]]; then
+  usage
+fi
+
+eval set -- ${args}
+while :
+do
+  case $1 in
+    -r | --rc)      rc=1       ; shift   ;;
+    -h | --help)    usage      ; shift   ;;
+    -v | --version) show_ver   ; shift   ;;
+    -t | --trim)    trim=$2    ; shift 2 ;;
+    -m | --mask)    mask=$2    ; shift 2 ;;
+    # -- means the end of the arguments; drop this, and
+    # break out of the while loop
+    --) shift; break ;;
+    *) >&2 echo Unsupported option: $1
+       usage ;;
+  esac
+done
+
+CHECK_NUM_ARG(){
+   if [[ $# -ne 3 ]]; then
+      >&2 echo $0 requires 3 inputs
+      exit 1
+   fi
+   local func=$1
+   local passed=$2
+   local required=$3
+   if [[ ${passed} -ne ${required} ]]; then
+      >&2 echo ${func} requires ${required} inputs
+      exit 1
+   fi
+}
+
+TRIM(){
+   CHECK_NUM_ARG ${FUNCNAME[0]} $# 2
+   local s=$1
+   local n=$2
+   local e=$(( ${#s} - ${n} ))
+   echo "${s:0:${e}}"
+}
+
+REV(){
+   CHECK_NUM_ARG ${FUNCNAME[0]} $# 1
+   local s=$1
+   echo ${s} | rev
+}
+
+COMP(){
+   CHECK_NUM_ARG ${FUNCNAME[0]} $# 1
+   local s=$1
+   CHECK_DNA ${s}
+   echo ${s} | tr 'ACGT' 'TGCA'
+}
+
+TO_UPPER(){
+   CHECK_NUM_ARG ${FUNCNAME[0]} $# 1
+   local s=$1
+   echo ${s} | tr 'a-z' 'A-Z'
+}
+
+MASK_SEQ(){
+   CHECK_NUM_ARG ${FUNCNAME[0]} $# 2
+   local s=$1
+   local m=$2
+   CHECK_DNA ${s}
+   local n=$(printf '%*s' ${#m} | tr ' ' 'N')
+   echo ${s} | sed "s/${m}/${n}/g"
+}
+
+# Tip 5. Always raise an error if something goes wrong
+CHECK_FASTQ(){
+   CHECK_NUM_ARG ${FUNCNAME[0]} $# 1
+   local c=$1
+   if [[ ! $c =~ f(ast)?q(.gz)?$ ]]; then
+      >&2 echo ERROR: ${c} is not a FASTQ File
+      exit 1
+   fi
+}
+
+# Tip 6. Validate your parameters
+CHECK_INT(){
+   CHECK_NUM_ARG ${FUNCNAME[0]} $# 1
+   local c=$1
+   if [[ ! $c =~ ^[1-9]+[0-9]*$ ]]; then
+      >&2 echo ${c} is not an integer
+      exit 1
+   fi
+}
+
+CHECK_DNA(){
+   CHECK_NUM_ARG ${FUNCNAME[0]} $# 1
+   local c=$1
+   if [[ ! $c =~ ^[ACGTN]+$ ]]; then
+      >&2 echo ${c} does not contain valid nucleotides
+      exit 1
+   fi
+}
+
+f=$1
+CHECK_FASTQ ${f}
+cmd="cat"
+if [[ ${f} =~ .gz$ ]]; then
+   cmd="gunzip -c"
+fi
+
+IFS=$'\n'
+for l in $(eval ${cmd} ${f} | paste - - - -); do
+   IFS=$'\t'
+   s=(${l})
+   id=${s[0]}
+   seq=${s[1]}
+   junk=${s[2]}
+   qual=${s[3]}
+   if [[ ${rc} -eq 1 ]]; then
+      seq=$(REV $(COMP ${seq}))
+   fi
+   if [[ ${trim} -gt 0 ]]; then
+      seq=$(TRIM ${seq} ${trim})
+      qual=$(TRIM ${qual} ${trim})
+   fi
+   if [[ ${mask} != false ]]; then
+      seq=$(MASK_SEQ ${seq} ${mask})
+   fi
+   echo -e "${id}\n${seq}\n${junk}\n${qual}"
+done
+
+exit 0
