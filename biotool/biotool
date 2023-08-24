@@ -9,7 +9,7 @@ set -euo pipefail
 
 # 1. Print something if no parameters are supplied
 if [[ $# -eq 0 ]]; then
-   >&2 echo -e "\nPlease use the --help option to get usage information.\n"
+   >&2 echo -e "\nPlease use the -h or --help option to get usage information.\n"
    exit 1
 fi
 
@@ -39,15 +39,15 @@ Synopsis: manipulate reads in a FASTQ file
 
 Options:
 
---rc reverse complement
+-r | --rc reverse complement
 
---trim nn trim <nn> bases from 3' end first
+-t | --trim nn trim <nn> bases from 3' end first
 
---mask mask vector sequence
+-m | --mask mask vector sequence
 
---help display this message
+-h | --help display this message
 
---version display version
+-v | --version display version
 
 EOF
 exit 1
@@ -165,7 +165,7 @@ if [[ ${trim} != false ]]; then
    CHECK_INT ${trim}
 fi
 
-if [[ $@ -eq 0 ]]; then
+if [[ $# -eq 0 ]]; then
    >&2 echo Please provide an input FASTQ file
    exit 1
 fi
