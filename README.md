@@ -10,7 +10,7 @@ Table of Contents
    * [Regular expressions and globbing](#regular-expressions-and-globbing)
    * [String manipulation](#string-manipulation)
    * [Debugging](#debugging)
-   * [Tips](#tips)
+   * [Best practices](#best-practices)
    * [Further reading](#further-reading)
 
 Created by [gh-md-toc](https://github.com/ekalinin/github-markdown-toc)
@@ -278,7 +278,7 @@ the function.
 log(){
    local prefix="[$(date +%Y/%m/%d\ %H:%M:%S)]: "
    >&2 echo "${prefix} $@"
-} 
+}
 log "INFO" "a message"
 # [2023/04/11 11:43:45]:  INFO a message
 ```
@@ -484,10 +484,55 @@ bash -x script/ignore_exit_code.sh
 `-v` and `-x` can also be made permanent by adding `set -o verbose` and `set -o
 xtrace` to the script.
 
-## Tips
+## Best practices
+
+* Start each script with `#!/usr/bin/env bash` then with `set -euo pipefail`
+    * `-e` is short for `errexit` and if a command fails your script will exit.
+    * `-u` is short for `nounset` and your script will exit when a variable is
+    undeclared.
+    * `pipefail` sets the result of a pipeline to a non-zero status if any
+    command in the pipeline had a non-zero status.
+    * `set -euo pipefail` can be split up if you think it is more readable
+
+```bash
+set -o nounset
+set -o errexit
+set -o pipefail
+```
+
+* Note that some commands exit with a non-zero status, even if it did "not
+  fail".
+
+```console
+echo hi | grep no
+echo $?
+# 1
+```
+
+* You can consider using `. my.sh` instead of `source my.sh`; the former is the
+  POSIX-standard for executing commands whereas the latter is specific to some
+  shells like Bash. But since this is a Bash guide, I consider it fine to keep
+  using `source`, which is also more readable.
+
+* I prefer using `${var}` instead of `$var` for all variables.
+
+* I also prefer snake_case over camelCase.
+
+* Warnings and errors should go to `STDERR` and I like to include the
+  redirection at the front because it is more readable. The following commands
+  are the same; you be the judge of which is more readable.
+
+```console
+>&2 echo ERROR
+echo ERROR >&2
+```
+
+* To make variables local to a function, declare them with the `local` builtin
+  command. Refer to the [Variables](#variables) section.
 
 * Use `$()` instead of backticks ` `` ` because it is easier to specify and see
-nested subshells using `$()`.
+  nested subshells using `$()`.
+
 * Use `[[]]` (double brackets) over `[]` because it offers syntactical
   improvements and new functionality
     * `||` - logical or (double brackets only)
@@ -496,16 +541,20 @@ nested subshells using `$()`.
     * `=` - string matching with globbing
     * `==` - string matching with globbing (double brackets only)
     * `=~` - string matching with regular expressions (double brackets only)
-    * `-n` - string is non-empty        
+    * `-n` - string is non-empty
     * `-z` - string is empty
     * `-eq` - numerical equality
     * `-lt` - numerical comparison
     * `-ne` - numerical inequality
-* Avoid temporary files by using the `<()` operator, which transforms a command
-into something that can be used as a filename, e.g. `diff <(wget -O - URL1) <(wget -O - URL2)`.
-* Heredocs are handy for passing multi-line strings to a command.
 
-```console
+* Avoid temporary files by using the `<()` operator, which transforms a command
+  into something that can be used as a filename, e.g. `diff <(wget -O - URL1)
+  <(wget -O - URL2)`.
+
+* Heredocs are handy for passing multi-line strings to a command. Note how
+  variable interpolation is set.
+
+```bash
 var=test
 # variable interpolation
 cat << EOF
