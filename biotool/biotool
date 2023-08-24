@@ -173,7 +173,7 @@ for l in $(eval ${cmd} ${f} | paste - - - -); do
    IFS=$'\t'
    s=(${l})
    id=${s[0]}
-   seq=${s[1]}
+   seq=$(TO_UPPER ${s[1]})
    junk=${s[2]}
    qual=${s[3]}
    if [[ ${rc} -eq 1 ]]; then
