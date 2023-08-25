@@ -4,7 +4,7 @@
 # Year 2023
 #
 
-check_tool(){
+CHECK_TOOL(){
    tool=$1
    if [[ ! -x $(command -v ${tool}) ]]; then
      >&2 echo Could not find ${tool}

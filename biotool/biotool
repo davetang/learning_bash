@@ -26,7 +26,7 @@ source scripts/helper.sh
 # Tip 9. Check that your dependencies are installed
 dependencies=( rev tr sed gunzip )
 for d in ${dependencies[@]}; do
-   check_tool ${d}
+   CHECK_TOOL ${d}
 done
 
 # Tip 4. Do not use stdout for messages and errors
