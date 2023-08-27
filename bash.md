@@ -1,5 +1,5 @@
 # Learning Bash
-2023-08-26
+2023-08-27
 
 - [Data structures](#data-structures)
 - [Strict mode](#strict-mode)
@@ -46,20 +46,34 @@ only digits, Bash allows simple arithmetic operations.
 ``` bash
 x=1985
 echo $(( x - 1 ))
+```
 
-x=nine
+    1984
+
+Note what happens when a variable is a string.
+
+``` bash
+x='nine'
 echo $(( x - 1 ))
+```
 
+    -1
+
+``` bash
 x=nineteeneightyfour
 echo $(( x - 1 ))
+```
 
+    -1
+
+Be careful when using untyped variables.
+
+``` bash
+x=nineteeneightyfour
 xx=$(( x - 1 ))
 echo $(( xx + 1985))
 ```
 
-    1984
-    -1
-    -1
     1984
 
 Bash supports indexed arrays and associative arrays (also known as
@@ -67,28 +81,39 @@ hashes or dictionaries). Since Bash variables are untyped, array
 elements can contain characters and numbers.
 
 The easiest way to manually create an indexed array is to use
-parentheses.
+parentheses. Arrays are zero-indexed.
 
 ``` bash
 fruits=( apple banana cherry durian elderberry )
 
-# zero-indexed
 echo ${fruits[0]}
-
-# supports negative indexing
-echo ${fruits[-1]}
-echo ${fruits[-2]}
-
-echo ${fruits[@]}
 ```
 
     apple
+
+Negative indexing is supported.
+
+``` bash
+fruits=( apple banana cherry durian elderberry )
+echo ${fruits[-1]}
+echo ${fruits[-2]}
+```
+
     elderberry
     durian
+
+Use this syntax to refer to all elements.
+
+``` bash
+fruits=( apple banana cherry durian elderberry )
+echo ${fruits[@]}
+```
+
     apple banana cherry durian elderberry
 
 Associative arrays must be declared before they are created using
-`declare` and `-A`.
+`declare` and `-A`. Elements are referenced using square brackets not
+braces.
 
 ``` bash
 declare -A fruits_hash
@@ -101,52 +126,94 @@ fruits_hash=(
   [e]=elderberry
 )
 
-# referenced using square brackets not braces
 echo ${fruits_hash[a]}
-
 echo ${fruits_hash[c]}
 ```
 
     apple
     cherry
 
-Array length.
+Use the following syntax to get the array length.
 
 ``` bash
 fruits=( apple banana cherry durian elderberry )
 echo ${#fruits[@]}
-
-# get all indexes
-echo ${!fruits[@]}
 ```
 
     5
-    0 1 2 3 4
 
-Loop through the elements or the index (for both indexed and associative
-arrays).
+Use the following syntax to get all the indexes.
 
 ``` bash
+fruits=( apple banana cherry durian elderberry )
+echo ${!fruits[@]}
+```
+
+    0 1 2 3 4
+
+Loop through each element.
+
+``` bash
+fruits=( apple banana cherry durian elderberry )
 for i in ${fruits[@]}; do
   echo ${i}
 done
+```
 
+    apple
+    banana
+    cherry
+    durian
+    elderberry
+
+Loop through each element’s index.
+
+``` bash
+fruits=( apple banana cherry durian elderberry )
 for i in ${!fruits[@]}; do
   echo ${i}
 done
+```
 
+    0
+    1
+    2
+    3
+    4
+
+Loop through each element’s index, i.e. the key.
+
+``` bash
+declare -A fruits_hash
+
+fruits_hash=(
+  [a]=apple
+  [b]=banana
+  [c]=cherry
+  [d]=durian
+  [e]=elderberry
+)
 for i in ${!fruits_hash[@]}; do
   echo ${i}
 done
 ```
 
+    e
+    d
+    c
+    b
+    a
+
 Use `unset` to delete an element (even if it is in the middle of an
 array).
 
 ``` bash
+fruits=( apple banana cherry durian elderberry )
 unset fruits[3]
 echo ${fruits[@]}
 ```
+
+    apple banana cherry elderberry
 
 It seems that [2D arrays are
 possible](https://www.baeldung.com/linux/bash-2d-arrays) but if you need
@@ -209,7 +276,8 @@ When passing arguments to Bash functions:
 
 - The passed parameters are `$1`, `$2`, `$3`, …, \$n, corresponding to
   the position of the parameter after the function’s name.
-- The `$0` variable is reserved for the function’s name.
+- The `$0` variable is reserved for the function’s name (but this
+  doesn’t seem like the case in the example below).
 - The `$#` variable holds the number of positional parameters/arguments
   passed to the function.
 - The `$*` and `$@` variables hold all positional parameters/arguments
@@ -220,6 +288,26 @@ When passing arguments to Bash functions:
   “![2" "](https://latex.codecogs.com/svg.latex?2%22%20%22 "2" "")n”.
 - When not double-quoted, `$*` and `$@` are the same.
 
+``` bash
+my_func(){
+   echo $0
+   echo function name is ${FUNCNAME[0]}
+   echo first arg is $1
+   echo $# args passed
+   echo $*
+   echo $@
+}
+
+my_func one two three
+```
+
+    bash
+    function name is my_func
+    first arg is one
+    3 args passed
+    one two three
+    one two three
+
 Bash lets you define functions that behave like other commands.
 
 ``` bash
@@ -228,9 +316,6 @@ extract_comment(){
 }
 
 cat script/ignore_exit_code.sh | extract_comment
-
-comments=$(extract_comment < script/ignore_exit_code.sh)
-echo ${comments}
 ```
 
     #!/usr/bin/env bash
@@ -238,6 +323,17 @@ echo ${comments}
     # code > 0 when it has no matches
     # grep nothing README.md
     # use the following construct to ignore a "failing" command
+
+Redirect input to the function.
+
+``` bash
+extract_comment(){
+  grep "^#"
+}
+comments=$(extract_comment < script/ignore_exit_code.sh)
+echo ${comments}
+```
+
     #!/usr/bin/env bash # the grep command will cause the script to exit because grep returns an exit # code > 0 when it has no matches # grep nothing README.md # use the following construct to ignore a "failing" command
 
 Function to sum numbers (one per line) in a file. Local scope is
@@ -274,26 +370,30 @@ log(){
 log "INFO" "a message"
 ```
 
-    [2023/08/26 12:45:27]:  INFO a message
+    [2023/08/27 02:43:28]:  INFO a message
 
 ## Variables
 
-Use `local` to set local scoping for variables. Use `readonly` to set
-immutable variables.
+Use `local` to set local scoping for variables but this seems to be for
+use with functions only.
 
 ``` bash
-x=3
-echo ${x}
+local x=14
+```
 
+    bash: line 1: local: can only be used in a function
+
+Use `readonly` to set immutable variables.
+
+``` bash
 readonly x=1984
 echo ${x}
 
 x=2023
 ```
 
-    3
     1984
-    bash: line 7: x: readonly variable
+    bash: line 4: x: readonly variable
 
 Note that you cannot `unset` a readonly variable; it exists until the
 shell exits.
@@ -307,13 +407,26 @@ say(){
    echo ${smt}
 }
 
-say
-
 # this exits with a code of 1
-echo $?
+say
+# echo $?
+# 1
+```
+
+    Error in running command bash
+
+Functions works as intended when an argument is passed.
+
+``` bash
+say(){
+   smt=${1?Error: missing input}
+   echo ${smt}
+}
 
 say meow
 ```
+
+    meow
 
 You can also set a default value, instead exiting with an error.
 
@@ -327,6 +440,9 @@ say2
 
 say2 nothing
 ```
+
+    something
+    nothing
 
 ### Built-in variables
 
@@ -349,27 +465,41 @@ Some useful built-in variables.
 Globbing is a method for creating patterns that is used for matching;
 use `==` for string matching with globbing.
 
+Globbing will return true.
+
 ``` bash
 t="abc123"
 
-# returns true (globbing)
 [[ "$t" == abc* ]] && echo True
-
-# returns false (literal matching)
-[[ "$t" == "abc*" ]] || echo False
 ```
 
     True
+
+Literal matching is turned on with quotes.
+
+``` bash
+t="abc123"
+[[ "$t" == 'abc*' ]] || echo False
+[[ "$t" == "abc*" ]] || echo False
+```
+
+    False
     False
 
 Use `=~` for regular expression matching, which is only supported using
 double brackets.
 
 ``` bash
-# true (regular expression)
+t="abc123"
 [[ "$t" =~ [abc]+[123]+ ]] && echo True
+```
 
-# false (literal matching)
+    True
+
+Literal matching is turned on again with quotes.
+
+``` bash
+t="abc123"
 [[ "$t" =~ "abc*" ]] || echo False
 ```
 
@@ -380,7 +510,7 @@ double brackets.
 Length of a string.
 
 ``` bash
-#  12345678901234567890
+#  01234567890123456789
 f="path1/path2/file.ext"  
 echo ${#f}
 ```
@@ -390,20 +520,32 @@ echo ${#f}
 Slicing syntax: `${<var>:<start>}` or `${<var>:<start>:<length>}` where
 the position is 0-based.
 
+Start from position 6.
+
 ``` bash
+#  01234567890123456789
 f="path1/path2/file.ext"
-# start from position 6
 echo ${f:6}
-
-# start from position 6, and output 5 characters
-echo ${f:6:5}
-
-# negative index; note the space before "-"
-echo "${f: -8}"
 ```
 
     path2/file.ext
+
+Start from position 6, and output 5 characters.
+
+``` bash
+f="path1/path2/file.ext"
+echo ${f:6:5}
+```
+
     path2
+
+Negative indexing; note the space before “-”.
+
+``` bash
+f="path1/path2/file.ext"
+echo "${f: -8}"
+```
+
     file.ext
 
 Single substitution with globbing.
@@ -424,7 +566,8 @@ echo ${f//path?/path3}
 
     path3/path3/file.ext
 
-Splitting.
+Splitting; note the space before the right brace, which is used for the
+splitting.
 
 ``` bash
 f="path1/path2/file.ext"
@@ -435,29 +578,50 @@ echo ${array[@]}
 
     path1 path2 file.ext
 
-Deletion with globbing.
+Deletion with globbing; delete everything before the period.
 
 ``` bash
 f="path1/path2/file.ext" 
 echo ${f#*.}
-
-# non-greedy deletion at start of string
-echo ${f#*/}
-
-# greedy deletion at start of string
-echo ${f##*/}
-
-# deletion at string end
-echo ${f%/*}
-
-# greedy deletion at end
-echo ${f%%/*}
 ```
 
     ext
+
+Non-greedy deletion at start of string.
+
+``` bash
+f="path1/path2/file.ext" 
+echo ${f#*/}
+```
+
     path2/file.ext
+
+Use extra `#` for greedy deletion at start of string.
+
+``` bash
+f="path1/path2/file.ext" 
+echo ${f##*/}
+```
+
     file.ext
+
+Non-greedy deletion starting from string end; delete everything until
+matching a `/` (including the `/`).
+
+``` bash
+f="path1/path2/file.ext" 
+echo ${f%/*}
+```
+
     path1/path2
+
+Greedy deletion from the end.
+
+``` bash
+f="path1/path2/file.ext" 
+echo ${f%%/*}
+```
+
     path1
 
 ## Debugging
@@ -474,11 +638,53 @@ To produce a trace of every command executed run:
 bash -v script/ignore_exit_code.sh
 ```
 
+    #!/usr/bin/env bash
+    set -o nounset
+    set -o errexit
+
+    # the grep command will cause the script to exit because grep returns an exit
+    # code > 0 when it has no matches
+    # grep nothing README.md
+
+    script_dir=$(realpath $(dirname $0))
+    infile=${script_dir}/../README.md
+
+    # use the following construct to ignore a "failing" command
+    if ! grep -q not_going_to_find_this ${infile} ; then
+       >&2 echo "Failure ignored; continuing..."
+    fi
+    Failure ignored; continuing...
+
+    if grep -q e ${infile} ; then
+       >&2 echo "The letter [e] was found in ${infile}"
+    fi
+    The letter [e] was found in /home/dtang/github/learning_bash/script/../README.md
+
+    >&2 echo "Done"
+    Done
+    exit 0
+
 To produce a trace of the expanded command use:
 
 ``` bash
 bash -x script/ignore_exit_code.sh
 ```
+
+    + set -o nounset
+    + set -o errexit
+    +++ dirname script/ignore_exit_code.sh
+    ++ realpath script
+    + script_dir=/home/dtang/github/learning_bash/script
+    + infile=/home/dtang/github/learning_bash/script/../README.md
+    + grep -q not_going_to_find_this /home/dtang/github/learning_bash/script/../README.md
+    + echo 'Failure ignored; continuing...'
+    Failure ignored; continuing...
+    + grep -q e /home/dtang/github/learning_bash/script/../README.md
+    + echo 'The letter [e] was found in /home/dtang/github/learning_bash/script/../README.md'
+    The letter [e] was found in /home/dtang/github/learning_bash/script/../README.md
+    + echo Done
+    Done
+    + exit 0
 
 `-v` and `-x` can also be made permanent by adding `set -o verbose` and
 `set -o xtrace` to the script.
@@ -562,22 +768,34 @@ echo ERROR >&2
 - Heredocs are handy for passing multi-line strings to a command. Note
   how variable interpolation is set.
 
+Variable interpolation.
+
 ``` bash
 var=test
-# variable interpolation
 cat << EOF
 one
 ${var}
 three
 EOF
+```
 
-# no variable interpolation
+    one
+    test
+    three
+
+No variable interpolation.
+
+``` bash
 cat << 'EOF'
 one
 ${var}
 three
 EOF
 ```
+
+    one
+    ${var}
+    three
 
 ## Further reading
 
