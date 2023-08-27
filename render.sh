@@ -5,7 +5,7 @@ set -euo pipefail
 num_param=1
 
 usage(){
-   echo "Usage: $0 <file.qmd> [{pdf,html,docx}]"
+   echo "Usage: $0 <file.qmd> [output_name]"
    exit 1
 }
 
@@ -19,9 +19,14 @@ if [[ ! -e ${infile} ]]; then
   exit 1
 fi
 
-out_format=html
-if [[ $# -ge 2 ]]; then
-   out_format=$2
+if [[ ! ${infile} =~ \.qmd$ ]]; then
+  >&2 echo ${infile} is not a Quarto file
+  exit 1
+fi
+
+outfile=$(basename ${infile} .qmd).md
+if [[ $# -eq 2 ]]; then
+   outfile=$2
 fi
 
 check_depend (){
@@ -72,7 +77,7 @@ docker run \
    -w $(pwd) \
    -u $(id -u):$(id -g) \
    ${docker_image} \
-   render ${infile}
+   render ${infile} --output ${outfile}
 
 rm -rf ./deno-x86_64-unknown-linux-gnu
 
