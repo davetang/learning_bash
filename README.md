@@ -13,6 +13,9 @@
 - [Further reading](#further-reading)
 - [Version](#version)
 
+![Build
+README](https://github.com/davetang/learning_bash/actions/workflows/create_readme.yml/badge.svg)
+
 A shell is any user interface to the Linux/UNIX operating system; it is
 external to the kernel (like an actual shell, exoskeleton) and
 translates user input into instructions the operating system can
@@ -370,7 +373,7 @@ log(){
 log "INFO" "a message"
 ```
 
-    [2023/08/27 03:38:31]:  INFO a message
+    [2023/08/27 03:43:22]:  INFO a message
 
 ## Variables
 
