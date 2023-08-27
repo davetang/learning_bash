@@ -15,9 +15,6 @@ jobs:
   make_markdown:
     runs-on: ubuntu-latest
 
-    # the type of runner to run the given job
-    container: davetang/quarto:4.3.1
-
     # a list of the steps that will run as part of the job
     steps:
       - run: echo "The job was automatically triggered by a ${{ github.event_name }} event."
