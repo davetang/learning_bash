@@ -621,6 +621,7 @@ EOF
 No variable interpolation.
 
 ```{bash}
+var=test
 cat << 'EOF'
 one
 ${var}
