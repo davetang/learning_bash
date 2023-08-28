@@ -427,7 +427,7 @@ Length of a string.
 
 ```{bash}
 #  01234567890123456789
-f="path1/path2/file.ext"  
+f="path1/path2/file.ext"
 echo ${#f}
 ```
 
@@ -483,21 +483,21 @@ echo ${array[@]}
 Deletion with globbing; delete everything before the period.
 
 ```{bash}
-f="path1/path2/file.ext" 
+f="path1/path2/file.ext"
 echo ${f#*.}
 ```
 
 Non-greedy deletion at start of string.
 
 ```{bash}
-f="path1/path2/file.ext" 
+f="path1/path2/file.ext"
 echo ${f#*/}
 ```
 
 Use extra `#` for greedy deletion at start of string.
 
 ```{bash}
-f="path1/path2/file.ext" 
+f="path1/path2/file.ext"
 echo ${f##*/}
 ```
 
@@ -505,14 +505,14 @@ Non-greedy deletion starting from string end; delete everything until matching
 a `/` (including the `/`).
 
 ```{bash}
-f="path1/path2/file.ext" 
+f="path1/path2/file.ext"
 echo ${f%/*}
 ```
 
 Greedy deletion from the end.
 
 ```{bash}
-f="path1/path2/file.ext" 
+f="path1/path2/file.ext"
 echo ${f%%/*}
 ```
 
@@ -540,6 +540,16 @@ bash -x script/ignore_exit_code.sh
 xtrace` to the script.
 
 ## Best practices
+
+* The `biotool` directory in this repository contains a script (also called
+  `biotool`) that follows [Ten recommendations for creating usable
+  bioinformatics command line
+  software](https://academic.oup.com/gigascience/article/2/1/2047-217X-2-15/2656133).
+  Open the script up in your favourite editor to see how each of the
+  recommendations can be followed using Bash.
+
+* A lot of Bash syntax is obscure, which minimises typing, but makes it hard to
+  read. I highly recommend adding comments to your code.
 
 * Start each script with `#!/usr/bin/env bash` then with `set -euo pipefail`
     * `-e` is short for `errexit` and if a command fails your script will exit.
@@ -631,6 +641,14 @@ three
 EOF
 ```
 
+* If your script is getting big (over 100 lines), consider splitting it up into
+  functions stored in different files.
+
+* Lastly, if your code is getting too complicated, consider using another
+  programming language. They all have their advantages and disadvantages, so
+  try to pick one that suits your problem. Python is often a good choice for
+  many different problems.
+
 ## Further reading
 
 * [Advanced Bash scripting guide](https://tldp.org/LDP/abs/html/)
@@ -638,7 +656,7 @@ EOF
 
 ## Version
 
-Bash version used.
+Bash version used to generate this document.
 
 ```{bash}
 #| label: bash_version
