@@ -1,6 +1,7 @@
 # Learning Bash
-2023-08-27
+2023-08-28
 
+- [Bash scripting](#bash-scripting)
 - [Data structures](#data-structures)
 - [Strict mode](#strict-mode)
 - [Functions](#functions)
@@ -39,6 +40,32 @@ versions.
 There are two ways to use `bash`: as a command line interface and as a
 programming environment. These notes mostly pertain to the use of Bash
 as a programming/scripting language.
+
+## Bash scripting
+
+A Bash *script* or *program* is simply a file that contains Bash
+commands. Your `.bash_profile` and `.bashrc` files are Bash scripts. You
+can run a Bash script using the `source my_script` command or using
+`bash my_script` (or by adding `#!/usr/bin/env bash` to the start of
+your script and making your file executable, i.e. `chmod 755 my_script`)
+but there is an important difference between the two. Using `source`
+causes the commands in the script to be run as if they were part of your
+login session, where as using `bash` will run the script in a
+*subshell*. This means that a copy of the shell, which is a subprocess
+of the parent, is invoked.
+
+Subshells inherit the following from their parents:
+
+- The current directory
+- Environment variables
+- Standard input, output, and error, plus any other open file
+  descriptors
+- Signals that are ignored
+
+Subshells do not inherit the following from their parents:
+
+- Shell variables
+- Handling of signals that are not ignored
 
 ## Data structures
 
@@ -373,7 +400,7 @@ log(){
 log "INFO" "a message"
 ```
 
-    [2023/08/27 03:43:22]:  INFO a message
+    [2023/08/28 00:55:23]:  INFO a message
 
 ## Variables
 
@@ -514,7 +541,7 @@ Length of a string.
 
 ``` bash
 #  01234567890123456789
-f="path1/path2/file.ext"  
+f="path1/path2/file.ext"
 echo ${#f}
 ```
 
@@ -584,7 +611,7 @@ echo ${array[@]}
 Deletion with globbing; delete everything before the period.
 
 ``` bash
-f="path1/path2/file.ext" 
+f="path1/path2/file.ext"
 echo ${f#*.}
 ```
 
@@ -593,7 +620,7 @@ echo ${f#*.}
 Non-greedy deletion at start of string.
 
 ``` bash
-f="path1/path2/file.ext" 
+f="path1/path2/file.ext"
 echo ${f#*/}
 ```
 
@@ -602,7 +629,7 @@ echo ${f#*/}
 Use extra `#` for greedy deletion at start of string.
 
 ``` bash
-f="path1/path2/file.ext" 
+f="path1/path2/file.ext"
 echo ${f##*/}
 ```
 
@@ -612,7 +639,7 @@ Non-greedy deletion starting from string end; delete everything until
 matching a `/` (including the `/`).
 
 ``` bash
-f="path1/path2/file.ext" 
+f="path1/path2/file.ext"
 echo ${f%/*}
 ```
 
@@ -621,7 +648,7 @@ echo ${f%/*}
 Greedy deletion from the end.
 
 ``` bash
-f="path1/path2/file.ext" 
+f="path1/path2/file.ext"
 echo ${f%%/*}
 ```
 
@@ -691,8 +718,19 @@ bash -x script/ignore_exit_code.sh
 
 ## Best practices
 
+- The `biotool` directory in this repository contains a script (also
+  called `biotool`) that follows [Ten recommendations for creating
+  usable bioinformatics command line
+  software](https://academic.oup.com/gigascience/article/2/1/2047-217X-2-15/2656133).
+  Open the script up in your favourite editor to see how each of the
+  recommendations can be followed using Bash.
+
+- A lot of Bash syntax is obscure, which minimises typing, but makes it
+  hard to read. I highly recommend adding comments to your code.
+
 - Start each script with `#!/usr/bin/env bash` then with
   `set -euo pipefail`
+
   - `-e` is short for `errexit` and if a command fails your script will
     exit.
   - `-u` is short for `nounset` and your script will exit when a
@@ -798,6 +836,14 @@ EOF
     ${var}
     three
 
+- If your script is getting big (over 100 lines), consider splitting it
+  up into functions stored in different files.
+
+- Lastly, if your code is getting too complicated, consider using
+  another programming language. They all have their advantages and
+  disadvantages, so try to pick one that suits your problem. Python is
+  often a good choice for many different problems.
+
 ## Further reading
 
 - [Advanced Bash scripting guide](https://tldp.org/LDP/abs/html/)
@@ -806,7 +852,7 @@ EOF
 
 ## Version
 
-Bash version used.
+Bash version used to generate this document.
 
 ``` bash
 bash --version
