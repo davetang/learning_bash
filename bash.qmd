@@ -35,6 +35,30 @@ There are two ways to use `bash`: as a command line interface and as a
 programming environment. These notes mostly pertain to the use of Bash as a
 programming/scripting language.
 
+## Bash scripting
+
+A Bash _script_ or _program_ is simply a file that contains Bash commands. Your
+`.bash_profile` and `.bashrc` files are Bash scripts. You can run a Bash script
+using the `source my_script` command or using `bash my_script` (or by adding
+`#!/usr/bin/env bash` to the start of your script and making your file
+executable, i.e. `chmod 755 my_script`) but there is an important difference
+between the two. Using `source` causes the commands in the script to be run as
+if they were part of your login session, where as using `bash` will run the
+script in a _subshell_. This means that a copy of the shell, which is a
+subprocess of the parent, is invoked.
+
+Subshells inherit the following from their parents:
+
+* The current directory
+* Environment variables
+* Standard input, output, and error, plus any other open file descriptors
+* Signals that are ignored
+
+Subshells do not inherit the following from their parents:
+
+* Shell variables
+* Handling of signals that are not ignored
+
 ## Data structures
 
 [Bash variables are untyped](https://tldp.org/LDP/abs/html/untyped.html) and
