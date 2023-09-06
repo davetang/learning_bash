@@ -38,3 +38,11 @@ ADD(){
    done
    echo ${sum}
 }
+
+RANDOM_STR(){
+   echo $(date) $RANDOM $RANDOM | md5sum | cut -f1 -d' '
+}
+
+GET_TARBALL_DIR(){
+   tar -tzf $1 | cut -f1 -d'/' | sort -u
+}
