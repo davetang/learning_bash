@@ -400,7 +400,7 @@ log(){
 log "INFO" "a message"
 ```
 
-    [2024/05/24 01:29:33]:  INFO a message
+    [2024/05/24 01:31:03]:  INFO a message
 
 ## Variables
 
@@ -687,7 +687,7 @@ bash -v script/ignore_exit_code.sh
     if grep -q e ${infile} ; then
        >&2 echo "The letter [e] was found in ${infile}"
     fi
-    The letter [e] was found in /home/dtang/github/learning_bash/script/../README.md
+    The letter [e] was found in /home/runner/work/learning_bash/learning_bash/script/../README.md
 
     >&2 echo "Done"
     Done
@@ -703,12 +703,12 @@ bash -x script/ignore_exit_code.sh
     + set -o errexit
     +++ dirname script/ignore_exit_code.sh
     ++ realpath script
-    + script_dir=/home/dtang/github/learning_bash/script
-    + infile=/home/dtang/github/learning_bash/script/../README.md
-    + grep -q not_going_to_find_this /home/dtang/github/learning_bash/script/../README.md
-    + grep -q e /home/dtang/github/learning_bash/script/../README.md
-    + echo 'The letter [e] was found in /home/dtang/github/learning_bash/script/../README.md'
-    The letter [e] was found in /home/dtang/github/learning_bash/script/../README.md
+    + script_dir=/home/runner/work/learning_bash/learning_bash/script
+    + infile=/home/runner/work/learning_bash/learning_bash/script/../README.md
+    + grep -q not_going_to_find_this /home/runner/work/learning_bash/learning_bash/script/../README.md
+    + grep -q e /home/runner/work/learning_bash/learning_bash/script/../README.md
+    + echo 'The letter [e] was found in /home/runner/work/learning_bash/learning_bash/script/../README.md'
+    The letter [e] was found in /home/runner/work/learning_bash/learning_bash/script/../README.md
     + echo Done
     Done
     + exit 0
