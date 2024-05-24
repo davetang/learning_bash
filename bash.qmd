@@ -622,6 +622,8 @@ echo ERROR >&2
 * Use `$()` instead of backticks ` `` ` because it is easier to specify and see
   nested subshells using `$()`.
 
+* A side note about the difference between `()` and `$()`; the former is for grouping commands together in a subshell `(echo Hello; echo World)` and the latter is meant for command substitution where it makes it convenient to store command outputs as a variable `ME=$(whoami)`.
+
 * Use `[[]]` (double brackets) over `[]` because it offers syntactical
   improvements and new functionality
     * `||` - logical or (double brackets only)
