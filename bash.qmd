@@ -1,7 +1,7 @@
 ---
 title: "Learning Bash"
 date: '`r format(Sys.Date(), "%Y-%m-%d")`'
-date-format: "YYYY-MM-DD"
+date-format: iso
 execute:
   echo: true
   cache: false
