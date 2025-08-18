@@ -2,6 +2,7 @@
 2025-08-18
 
 - [Bash scripting](#bash-scripting)
+- [Input handling](#input-handling)
 - [Data structures](#data-structures)
 - [Strict mode](#strict-mode)
 - [Functions](#functions)
@@ -66,6 +67,57 @@ Subshells do not inherit the following from their parents:
 
 - Shell variables
 - Handling of signals that are not ignored
+
+## Input handling
+
+In Linux, `<`, `<<`, and `<<<` are redirection operators used for input
+handling.
+
+- `<` (input redirection) - redirects input from a file to a command
+  instead of reading from standard input.
+
+``` bash
+printf "13\n1\n31\n" > test.txt
+
+sort < test.txt
+wc -l < test.txt
+```
+
+    1
+    13
+    31
+    3
+
+- `<<` (here doc) - creates a multi-line input block that continues
+  until it encounters a specified delimiter (often `EOF`).
+
+``` bash
+cat << EOF
+This is line 1
+This is line 2
+This is line 3
+EOF
+```
+
+    This is line 1
+    This is line 2
+    This is line 3
+
+- `<<<` (here string) - passes a string directly as input to a command.
+
+``` bash
+grep 1984 <<< "The year is 1984."
+awk '{print $1 + $2}' <<< "1900 84"
+```
+
+    The year is 1984.
+    1984
+
+Summary:
+
+- `<` reads from an existing file.
+- `<<` creates temporary multi-line input.
+- `<<<` provides immediate string input.
 
 ## Data structures
 
@@ -400,7 +452,7 @@ log(){
 log "INFO" "a message"
 ```
 
-    [2025/08/18 02:18:59]:  INFO a message
+    [2025/08/18 02:38:17]:  INFO a message
 
 ## Variables
 
