@@ -1,5 +1,5 @@
 # Learning Bash
-2024-05-24
+2025-08-18
 
 - [Bash scripting](#bash-scripting)
 - [Data structures](#data-structures)
@@ -400,7 +400,7 @@ log(){
 log "INFO" "a message"
 ```
 
-    [2024/05/24 01:31:03]:  INFO a message
+    [2025/08/18 02:18:59]:  INFO a message
 
 ## Variables
 
