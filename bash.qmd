@@ -69,7 +69,7 @@ In Linux, `<`, `<<`, and `<<<` are redirection operators used for input handling
 printf "13\n1\n31\n" > test.txt
 
 sort < test.txt
-wc -l < file.txt
+wc -l < test.txt
 ```
 
 * `<<` (here doc) - creates a multi-line input block that continues until it encounters a specified delimiter (often `EOF`).
