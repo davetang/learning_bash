@@ -86,7 +86,7 @@ EOF
 
 ```{bash}
 grep 1984 <<< "The year is 1984."
-bc -l<<<"1900 + 42 * 2"
+awk '{print $1 + $2}' <<< "1900 84"
 ```
 
 Summary:
