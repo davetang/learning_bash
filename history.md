@@ -19,6 +19,11 @@ The following works if history expansion is enabled; `set -H`, which is the defa
 * `!!:s/old/new/` -> same as above, but explicit `:s` substitution
 * `!!:gs/old/new/` -> replace *all* occurrences of `old` with `new`
 
+```console
+ls README.md history.md
+^ls^head # becomes head README.md history.md
+```
+
 ## Word designators
 
 These let you pick parts (words) of the matched command:
