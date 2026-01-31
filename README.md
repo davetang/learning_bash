@@ -1,5 +1,5 @@
 # Learning Bash
-2025-08-18
+2026-01-31
 
 - [Bash scripting](#bash-scripting)
 - [Input handling](#input-handling)
@@ -452,7 +452,7 @@ log(){
 log "INFO" "a message"
 ```
 
-    [2025/08/18 02:38:17]:  INFO a message
+    [2026/01/31 13:47:09]:  INFO a message
 
 ## Variables
 
