@@ -15,31 +15,31 @@ fi
 
 infile=$1
 if [[ ! -e ${infile} ]]; then
-  >&2 echo ${infile} does not exist
+  >&2 echo "${infile} does not exist"
   exit 1
 fi
 
 if [[ ! ${infile} =~ \.qmd$ ]]; then
-  >&2 echo ${infile} is not a Quarto file
+  >&2 echo "${infile} is not a Quarto file"
   exit 1
 fi
 
-outfile=$(basename ${infile} .qmd).md
+outfile=$(basename "${infile}" .qmd).md
 if [[ $# -eq 2 ]]; then
    outfile=$2
 fi
 
 check_depend (){
-   tool=$1
-   if [[ ! -x $(command -v ${tool}) ]]; then
-     >&2 echo Could not find ${tool}
+   local tool=$1
+   if [[ ! -x $(command -v "${tool}") ]]; then
+     >&2 echo "Could not find ${tool}"
      exit 1
    fi
 }
 
 dependencies=(docker)
-for tool in ${dependencies[@]}; do
-   check_depend ${tool}
+for tool in "${dependencies[@]}"; do
+   check_depend "${tool}"
 done
 
 now(){
@@ -48,13 +48,13 @@ now(){
 
 SECONDS=0
 
->&2 printf "[ %s %s ] Start job\n\n" $(now)
+>&2 printf "[ %s ] Start job\n\n" "$(now)"
 
 r_version=4.3.1
 docker_image=davetang/quarto:${r_version}
 package_dir=${HOME}/r_packages_${r_version}
 if [[ ! -d ${package_dir} ]]; then
-   mkdir ${package_dir}
+   mkdir "${package_dir}"
 fi
 
 # Environment variables
@@ -72,17 +72,17 @@ docker run \
    --env DENO_DIR=/tmp/quarto_deno_cache_home \
    --env XDG_CACHE_HOME=/tmp/quarto_cache_home \
    --env XDG_DATA_HOME=/tmp/quarto_data_home \
-   -v $(pwd):$(pwd) \
-   -v ${package_dir}:/packages \
-   -w $(pwd) \
-   -u $(id -u):$(id -g) \
-   ${docker_image} \
-   render ${infile} --output ${outfile}
+   -v "$(pwd):$(pwd)" \
+   -v "${package_dir}:/packages" \
+   -w "$(pwd)" \
+   -u "$(id -u):$(id -g)" \
+   "${docker_image}" \
+   render "${infile}" --output "${outfile}"
 
 rm -rf ./deno-x86_64-unknown-linux-gnu
 
->&2 printf "\n[ %s %s ] Work complete\n" $(now)
+>&2 printf "\n[ %s ] Work complete\n" "$(now)"
 
 duration=$SECONDS
->&2 echo "$(($duration / 60)) minutes and $(($duration % 60)) seconds elapsed."
+>&2 echo "$((duration / 60)) minutes and $((duration % 60)) seconds elapsed."
 exit 0
