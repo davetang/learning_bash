@@ -95,6 +95,66 @@ Summary:
 * `<<` creates temporary multi-line input.
 * `<<<` provides immediate string input.
 
+## Output redirection and pipes
+
+Output redirection lets you control where command output goes. Standard output
+(stdout) is file descriptor 1 and standard error (stderr) is file descriptor 2.
+
+* `>` (overwrite) - redirects stdout to a file, creating or overwriting it.
+
+```{bash}
+echo "hello" > /tmp/out.txt
+cat /tmp/out.txt
+```
+
+* `>>` (append) - redirects stdout and appends to a file.
+
+```{bash}
+echo "world" >> /tmp/out.txt
+cat /tmp/out.txt
+rm /tmp/out.txt
+```
+
+* `2>` - redirects stderr to a file.
+
+```{bash}
+ls /nonexistent 2> /tmp/err.txt
+cat /tmp/err.txt
+rm /tmp/err.txt
+```
+
+* `&>` - redirects both stdout and stderr to a file.
+
+```{bash}
+ls /nonexistent &> /tmp/all.txt
+cat /tmp/all.txt
+rm /tmp/all.txt
+```
+
+* `2>&1` - redirects stderr to wherever stdout is going. This is useful for
+  combining streams in a pipeline.
+
+```{bash}
+ls /nonexistent 2>&1 | grep -i "no such"
+```
+
+* `|` (pipe) - sends stdout of one command as stdin to another command.
+
+```{bash}
+echo -e "cherry\napple\nbanana" | sort
+```
+
+* `tee` - reads from stdin and writes to both stdout and a file simultaneously.
+  This is useful for saving intermediate output while still passing it through a
+  pipeline.
+
+```{bash}
+echo -e "cherry\napple\nbanana" | tee /tmp/unsorted.txt | sort
+echo "---"
+cat /tmp/unsorted.txt
+rm /tmp/unsorted.txt
+```
+
 ## Data structures
 
 [Bash variables are untyped](https://tldp.org/LDP/abs/html/untyped.html) and
@@ -232,6 +292,61 @@ It seems that [2D arrays are
 possible](https://www.baeldung.com/linux/bash-2d-arrays) but if you need a 2D
 array, you should perhaps consider another scripting language (Python, Perl,
 etc.).
+
+## Quoting
+
+Quoting controls how Bash interprets special characters. There are three main
+forms: single quotes, double quotes, and no quotes.
+
+Single quotes preserve everything literally; no variable expansion or special
+character interpretation occurs.
+
+```{bash}
+x=1984
+echo '${x} is not expanded'
+echo 'special chars: * ? ~ $ ! are literal'
+```
+
+Double quotes allow variable expansion and command substitution but prevent word
+splitting and globbing.
+
+```{bash}
+x=1984
+echo "The year is ${x}"
+echo "Today is $(date +%A)"
+```
+
+Without quotes, Bash performs word splitting and globbing on the result. This can
+lead to unexpected behaviour.
+
+```{bash}
+msg="hello     world"
+
+# without quotes: extra spaces are lost due to word splitting
+echo ${msg}
+
+# with quotes: spaces are preserved
+echo "${msg}"
+```
+
+Use a backslash to escape special characters.
+
+```{bash}
+echo "A double quote: \" inside double quotes"
+echo 'Use '\''single quote'\'' inside single quotes'
+echo "A literal dollar sign: \$HOME"
+```
+
+Quoting is especially important when dealing with filenames that contain spaces
+or special characters, and when passing arguments that should remain as a single
+word.
+
+```{bash}
+file="my file.txt"
+touch "${file}"
+ls -la "${file}"
+rm "${file}"
+```
 
 ## Strict mode
 
@@ -445,6 +560,82 @@ Some useful built-in variables.
 * `$@` - all parameters to script/function (sees arguments as separate word)
 * `$*` - all parameters to script/function (sees arguments as single word)
 
+## Arithmetic
+
+Bash supports integer arithmetic using `$(( ))` for arithmetic expansion and
+`(( ))` for arithmetic evaluation.
+
+Common operators: `+`, `-`, `*`, `/` (integer division), `%` (modulus), `**`
+(exponentiation).
+
+```{bash}
+echo $(( 10 + 3 ))
+echo $(( 10 - 3 ))
+echo $(( 10 * 3 ))
+echo $(( 10 / 3 ))
+echo $(( 10 % 3 ))
+echo $(( 2 ** 10 ))
+```
+
+Use `(( ))` for arithmetic evaluation, which is useful for incrementing
+variables and in conditions.
+
+```{bash}
+x=0
+(( x++ ))
+echo ${x}
+(( x += 10 ))
+echo ${x}
+```
+
+Use `(( ))` as a condition in `if` statements. It returns 0 (true) if the
+expression is non-zero, and 1 (false) if the expression is zero.
+
+```{bash}
+x=42
+if (( x > 40 )); then
+  echo "${x} is greater than 40"
+fi
+```
+
+For floating-point arithmetic, use `awk` or `bc` since Bash only supports
+integers natively.
+
+```{bash}
+echo "10 / 3" | bc -l
+awk 'BEGIN { printf "%.2f\n", 10 / 3 }'
+```
+
+## Command substitution
+
+Command substitution allows you to capture the output of a command and use it as
+a value. The syntax is `$(command)`.
+
+```{bash}
+current_date=$(date +%Y-%m-%d)
+echo "Today is ${current_date}"
+```
+
+```{bash}
+num_files=$(ls | wc -l)
+echo "There are ${num_files} items in the current directory"
+```
+
+Command substitutions can be nested.
+
+```{bash}
+echo "The parent directory is $(basename $(dirname $(pwd)))"
+```
+
+You can also use command substitution inline.
+
+```{bash}
+echo "Logged in as $(whoami) on $(hostname)"
+```
+
+The older backtick syntax `` `command` `` is equivalent but harder to read and
+nest, so `$()` is preferred (see [Best practices](#best-practices)).
+
 ## Regular expressions and globbing
 
 Globbing is a method for creating patterns that is used for matching; use `==`
@@ -575,6 +766,337 @@ Greedy deletion from the end.
 f="path1/path2/file.ext"
 echo ${f%%/*}
 ```
+
+## Conditionals
+
+The `if` statement is the primary conditional construct in Bash. The basic syntax
+is `if/then/elif/else/fi`.
+
+```{bash}
+x=10
+if [[ ${x} -gt 5 ]]; then
+  echo "${x} is greater than 5"
+elif [[ ${x} -eq 5 ]]; then
+  echo "${x} is equal to 5"
+else
+  echo "${x} is less than 5"
+fi
+```
+
+File test operators are useful for checking file properties.
+
+* `-e` - file exists
+* `-f` - is a regular file
+* `-d` - is a directory
+* `-r` - is readable
+* `-w` - is writable
+* `-x` - is executable
+* `-s` - file exists and is not empty
+
+```{bash}
+if [[ -f bash.qmd ]]; then
+  echo "bash.qmd exists and is a regular file"
+fi
+
+if [[ -d script ]]; then
+  echo "script is a directory"
+fi
+
+if [[ ! -e nonexistent ]]; then
+  echo "nonexistent does not exist"
+fi
+```
+
+String comparisons.
+
+```{bash}
+name="bash"
+if [[ -z "" ]]; then
+  echo "empty string is zero-length"
+fi
+
+if [[ -n "${name}" ]]; then
+  echo "${name} is non-empty"
+fi
+
+if [[ "${name}" == "bash" ]]; then
+  echo "name is bash"
+fi
+```
+
+Combine conditions using `&&` (and) and `||` (or) inside double brackets.
+
+```{bash}
+x=15
+if [[ ${x} -gt 10 && ${x} -lt 20 ]]; then
+  echo "${x} is between 10 and 20"
+fi
+```
+
+Short-circuit evaluation is a concise alternative for simple conditionals.
+
+```{bash}
+[[ -f bash.qmd ]] && echo "file exists"
+[[ -f nonexistent ]] || echo "file does not exist"
+```
+
+## Case statements
+
+The `case` statement matches a value against patterns, similar to a switch
+statement in other languages. Each pattern is terminated by `;;`.
+
+```{bash}
+fruit="banana"
+case ${fruit} in
+  apple)
+    echo "It's an apple"
+    ;;
+  banana|plantain)
+    echo "It's a banana or plantain"
+    ;;
+  *)
+    echo "Unknown fruit: ${fruit}"
+    ;;
+esac
+```
+
+`case` is useful for parsing command-line options.
+
+```{bash}
+#| eval: false
+while [[ $# -gt 0 ]]; do
+  case $1 in
+    -v|--verbose)
+      VERBOSE=1
+      shift
+      ;;
+    -o|--output)
+      OUTPUT="$2"
+      shift 2
+      ;;
+    *)
+      echo "Unknown option: $1"
+      exit 1
+      ;;
+  esac
+done
+```
+
+## Loops
+
+### for loop
+
+Iterate over a list of items.
+
+```{bash}
+for colour in red green blue; do
+  echo ${colour}
+done
+```
+
+Iterate over a range using brace expansion.
+
+```{bash}
+for i in {1..5}; do
+  echo ${i}
+done
+```
+
+C-style for loop.
+
+```{bash}
+for (( i = 0; i < 5; i++ )); do
+  echo ${i}
+done
+```
+
+### while loop
+
+Execute commands as long as a condition is true.
+
+```{bash}
+count=1
+while [[ ${count} -le 5 ]]; do
+  echo "Count: ${count}"
+  (( count++ ))
+done
+```
+
+### until loop
+
+Execute commands until a condition becomes true (the opposite of `while`).
+
+```{bash}
+count=1
+until [[ ${count} -gt 5 ]]; do
+  echo "Count: ${count}"
+  (( count++ ))
+done
+```
+
+### break and continue
+
+Use `break` to exit a loop early and `continue` to skip to the next iteration.
+
+```{bash}
+for i in {1..10}; do
+  if [[ ${i} -eq 3 ]]; then
+    continue
+  fi
+  if [[ ${i} -eq 7 ]]; then
+    break
+  fi
+  echo ${i}
+done
+```
+
+### Looping over lines in a file
+
+Use `while read` to process a file line by line. This is preferred over `for`
+loops for reading files because it handles whitespace correctly.
+
+```{bash}
+echo -e "first line\nsecond line\nthird line" > /tmp/lines.txt
+while IFS= read -r line; do
+  echo "Line: ${line}"
+done < /tmp/lines.txt
+rm /tmp/lines.txt
+```
+
+## Reading user input
+
+The `read` builtin reads a line from standard input and assigns it to variables.
+
+```{bash}
+#| eval: false
+read -p "Enter your name: " name
+echo "Hello, ${name}"
+```
+
+Use `-r` to prevent backslash from acting as an escape character.
+
+```{bash}
+echo 'path\to\file' | read -r mypath
+```
+
+Use `-a` to read input into an array.
+
+```{bash}
+echo "one two three" | { read -ra words; echo "${words[1]}"; }
+```
+
+Use `-t` to set a timeout (in seconds).
+
+```{bash}
+#| eval: false
+if read -t 5 -p "Enter something (5 sec timeout): " input; then
+  echo "You entered: ${input}"
+else
+  echo "Timed out"
+fi
+```
+
+## Exit codes and return values
+
+Every command in Bash returns an exit code (also called exit status or return
+code). By convention, 0 means success and any non-zero value indicates failure.
+The exit code of the last command is stored in `$?`.
+
+```{bash}
+true
+echo "Exit code of true: $?"
+false
+echo "Exit code of false: $?"
+```
+
+Use `exit` to terminate a script with a specific exit code.
+
+```{bash}
+#| eval: false
+#!/usr/bin/env bash
+if [[ ! -f "required_file.txt" ]]; then
+  >&2 echo "Error: required_file.txt not found"
+  exit 1
+fi
+```
+
+Inside a function, use `return` instead of `exit`. `return` exits the function
+while `exit` terminates the entire script.
+
+```{bash}
+is_even(){
+  if (( $1 % 2 == 0 )); then
+    return 0
+  else
+    return 1
+  fi
+}
+
+if is_even 4; then
+  echo "4 is even"
+fi
+
+if ! is_even 7; then
+  echo "7 is odd"
+fi
+```
+
+For pipelines, `$?` only reflects the exit code of the last command. Use
+`${PIPESTATUS[@]}` to check the exit code of each command in the pipeline.
+
+```{bash}
+#| error: true
+false | true
+echo "Last exit code: $?"
+false | true
+echo "Pipeline exit codes: ${PIPESTATUS[@]}"
+```
+
+## Traps and signal handling
+
+The `trap` command lets you execute commands when a script receives a signal or
+exits. This is commonly used for cleanup tasks like removing temporary files.
+
+```{bash}
+#| eval: false
+#!/usr/bin/env bash
+set -euo pipefail
+
+tmpfile=$(mktemp)
+trap "rm -f ${tmpfile}" EXIT
+
+echo "Working with ${tmpfile}"
+# the temp file will be automatically removed when the script exits
+```
+
+Common signals to trap:
+
+* `EXIT` - when the script exits (for any reason)
+* `SIGINT` - when the user presses Ctrl+C
+* `SIGTERM` - when the script is terminated
+* `ERR` - when a command fails (with `set -e`)
+
+You can trap multiple signals.
+
+```{bash}
+#| eval: false
+#!/usr/bin/env bash
+set -euo pipefail
+
+tmpdir=$(mktemp -d)
+
+cleanup(){
+  >&2 echo "Cleaning up ${tmpdir}"
+  rm -rf "${tmpdir}"
+}
+
+trap cleanup EXIT SIGINT SIGTERM
+
+# the cleanup function runs automatically on exit
+echo "Temporary directory: ${tmpdir}"
+```
+
+See `script/trap.sh` in this repository for a working example.
 
 ## Debugging
 
