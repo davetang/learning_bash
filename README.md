@@ -1,5 +1,5 @@
 # Learning Bash
-2026-02-07
+2026-09-28
 
 - [Bash scripting](#bash-scripting)
 - [Input handling](#input-handling)
@@ -429,7 +429,7 @@ echo "Today is $(date +%A)"
 ```
 
     The year is 1984
-    Today is Saturday
+    Today is Monday
 
 Without quotes, Bash performs word splitting and globbing on the result.
 This can lead to unexpected behaviour.
@@ -470,7 +470,7 @@ ls -la "${file}"
 rm "${file}"
 ```
 
-    -rw-r--r-- 1 1001 1001 0 Feb  7 14:19 my file.txt
+    -rw-r--r-- 1 1001 1001 0 Sep 28 03:45 my file.txt
 
 ## Strict mode
 
@@ -622,7 +622,7 @@ log(){
 log "INFO" "a message"
 ```
 
-    [2026/02/07 14:19:44]:  INFO a message
+    [2026/09/28 03:45:45]:  INFO a message
 
 ## Variables
 
@@ -783,7 +783,7 @@ current_date=$(date +%Y-%m-%d)
 echo "Today is ${current_date}"
 ```
 
-    Today is 2026-02-07
+    Today is 2026-09-28
 
 ``` bash
 num_files=$(ls | wc -l)
@@ -807,7 +807,7 @@ echo "Logged in as $(whoami) on $(hostname)"
 ```
 
     whoami: cannot find name for user ID 1001
-    Logged in as  on 80e2651f311a
+    Logged in as  on dd14c46116fe
 
 The older backtick syntax `` `command` `` is equivalent but harder to
 read and nest, so `$()` is preferred (see [Best
@@ -976,6 +976,10 @@ echo ${f%%/*}
 ```
 
     path1
+
+A useful trick for remembering that `#` is for the start (or
+left-to-right) and `%` is for the end (or right-to-left) is that `#` is
+left of `$` and `%` is right of `$` on the keyboard (`#$%`).
 
 ## Conditionals
 
