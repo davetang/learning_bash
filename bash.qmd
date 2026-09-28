@@ -767,6 +767,8 @@ f="path1/path2/file.ext"
 echo ${f%%/*}
 ```
 
+A useful trick for remembering that `#` is for the start (or left-to-right) and `%` is for the end (or right-to-left) is that `#` is left of `$` and `%` is right of `$` on the keyboard (`#$%`).
+
 ## Conditionals
 
 The `if` statement is the primary conditional construct in Bash. The basic syntax
